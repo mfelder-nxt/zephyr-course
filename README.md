@@ -1,7 +1,7 @@
 # Zephyr Training Environment
 
 Welcome to the Zephyr RTOS training! This repository includes a ready-to-use
-development environment based on Zephyr 4.3.0, which you can set up in one of
+development environment based on Zephyr 4.2.0, which you can set up in one of
 three ways:
 
 ---
