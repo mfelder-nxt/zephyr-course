@@ -10,3 +10,6 @@ manifest:
           - cmsis_6
           - hal_stm32
         path-prefix: deps
+
+  self:
+    path: .
