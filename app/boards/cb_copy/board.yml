@@ -1,0 +1,6 @@
+board:
+  name: cb_copy
+  full_name: Custom Board copy from Nucleo U385RG Q
+  vendor: st
+  socs:
+    - name: stm32u385xx
