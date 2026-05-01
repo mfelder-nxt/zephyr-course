@@ -1,0 +1,6 @@
+board:
+  name: cb_scratch
+  full_name: Custom Board from scratch
+  vendor: mfelder
+  socs:
+    - name: stm32u385xx

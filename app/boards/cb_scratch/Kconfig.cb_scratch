@@ -1,0 +1,3 @@
+
+config BOARD_CB_SCRATCH
+    select SOC_STM32U385XX
