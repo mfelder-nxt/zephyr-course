@@ -1,11 +1,11 @@
-#include <zephyr/drivers/gpio.h>
+#include <zephyr/drivers/sensor.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 
 /* The devicetree node identifier for the "led0" alias. */
 #define LED_NODE DT_ALIAS(app_led)
 
-static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED_NODE, gpios);
+static const struct device * driver = DEVICE_DT_GET(DT_NODELABEL(our_driver0));
 
 LOG_MODULE_REGISTER(main, LOG_LEVEL_INF);
 
@@ -13,14 +13,33 @@ int main(void)
 {
     bool led_state = true;
 
-    if (!gpio_is_ready_dt(&led)) return 0;
+    if (!device_is_ready(driver)) {
+        LOG_ERR("Our driver is not ready");
+        return -ENODEV;
+    }
 
-    if (gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE) < 0) return 0;
+    int ret = sensor_sample_fetch(driver);
+    if (ret < 0) {
+        LOG_ERR("Failed to fetch sample from our driver");
+        return -EIO;
+    }
 
     while (1) {
-        if (gpio_pin_toggle_dt(&led) < 0) return 0;
-
+        
         led_state = !led_state;
+        if(led_state) {
+            ret = sensor_sample_fetch(driver);
+            if (ret < 0) {
+                LOG_ERR("Failed to fetch sample from our driver");
+                return -EIO;
+            }
+        } else {
+            ret = sensor_channel_get(driver, SENSOR_CHAN_ALL , NULL);
+            if (ret < 0) {
+                LOG_ERR("Failed to get channel value from our driver");
+                return -EIO;
+            }
+        }
         LOG_INF("LED state: %s", led_state ? "ON" : "OFF");
         k_msleep(CONFIG_APP_HEARTBEAT_PERIOD_MS);
     }
