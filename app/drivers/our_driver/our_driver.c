@@ -114,10 +114,41 @@ static int cmd_our_driver_info(const struct shell *sh, size_t argc, char **argv)
     return 0;
 }
 
+static int cmd_our_driver_extension(const struct shell *sh, size_t argc, char **argv)
+{
+    if (!device_is_ready(DEVICE_DT_GET(DT_NODELABEL(our_driver0)))) {
+        shell_error(sh, "Device not ready");
+        return -ENODEV;
+    }   
+
+    char *endptr;
+    int value = strtol(argv[1], &endptr, 10);
+
+    if (*argv[1] == '\0' || *endptr != '\0') {
+        shell_error(sh, "Invalid number: %s", argv[1]);
+        return -EINVAL;
+    }
+
+    if (value < 0 || value > 100) {
+        shell_error(sh, "Value must be between 0 and 100");
+        return -EINVAL;
+    }
+
+    int ret = our_driver_extension_func(DEVICE_DT_GET(DT_NODELABEL(our_driver0)), &value);
+    if (ret < 0) {
+        shell_error(sh, "Failed to set user_param: %d", ret);
+        return ret;
+    }
+
+    shell_print(sh, "Set user_param to: %d", value);
+    return 0;
+}
+
 SHELL_STATIC_SUBCMD_SET_CREATE(sub_our_driver,
     SHELL_CMD(fetch, NULL, "Fetch sample from our driver", cmd_our_driver_fetch),
     SHELL_CMD(read, NULL, "Get channel value from our driver", cmd_our_driver_get),
     SHELL_CMD(info, NULL, "Prints driver info", cmd_our_driver_info),
+    SHELL_CMD_ARG(set, NULL, "Set user parameter: sensor set <value>", cmd_our_driver_extension, 2, 0),
     SHELL_SUBCMD_SET_END
 );
 
