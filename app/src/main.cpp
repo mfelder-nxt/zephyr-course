@@ -1,6 +1,6 @@
-#include <zephyr/drivers/sensor.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
+#include "../drivers/our_driver/our_driver.h"
 
 /* The devicetree node identifier for the "led0" alias. */
 #define LED_NODE DT_ALIAS(app_led)
@@ -23,6 +23,9 @@ int main(void)
         LOG_ERR("Failed to fetch sample from our driver");
         return -EIO;
     }
+
+    int value = 42;
+    our_driver_extension_func(driver, &value);
 
     while (1) {
         

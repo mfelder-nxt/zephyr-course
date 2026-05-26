@@ -1,4 +1,4 @@
-#include <zephyr/drivers/sensor.h>
+#include "our_driver.h"
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/logging/log.h>
 
@@ -8,6 +8,10 @@ LOG_MODULE_REGISTER(our_driver, LOG_LEVEL_INF);
 
 struct our_driver_config {
     struct gpio_dt_spec led;
+};
+
+struct our_driver_data {
+    int user_param;
 };
 
 static int our_driver_sample_fetch(const struct device *dev, enum sensor_channel chan)
@@ -31,9 +35,23 @@ static int our_driver_channel_get(const struct device *dev, enum sensor_channel 
     return 0;
 }
 
-static DEVICE_API(sensor, api_l6task1) = {
-    .sample_fetch = our_driver_sample_fetch,
-    .channel_get = our_driver_channel_get,
+static int our_driver_extension(const struct device *dev, void *data)
+{
+    struct our_driver_data *d = dev->data;
+    int new_val = *(int *)data;
+    LOG_INF("Executing extension function with data: %d", new_val);
+    
+    d->user_param = new_val;
+    
+    return 0;
+}   
+
+static struct our_driver_api api_l6task1 = {
+    .base_api = {
+        .sample_fetch = our_driver_sample_fetch,
+        .channel_get = our_driver_channel_get,
+    },
+    .extension_func = our_driver_extension,
 };
 
 static int our_driver_init(const struct device *dev)
@@ -53,14 +71,16 @@ static int our_driver_init(const struct device *dev)
     static const struct our_driver_config cfg_##inst = {       \
         .led = GPIO_DT_SPEC_GET(DT_PHANDLE(DT_DRV_INST(inst), led), gpios),  \
     };                                                                       \
-                                                                             \
+    static struct our_driver_data data_##inst = {                            \
+        .user_param = 0, /* Default value */                                 \
+    };                                                                       \
     DEVICE_DT_INST_DEFINE(inst,                                              \
                           our_driver_init,                                   \
                           NULL,                                              \
-                          NULL,                                              \
-                          &cfg_##inst,                         \
+                          &data_##inst,                                      \
+                          &cfg_##inst,                                       \
                           POST_KERNEL,                                       \
-                          80,                       \
+                          80,                                                \
                           &api_l6task1);
 
 DT_INST_FOREACH_STATUS_OKAY(OUR_DRIVER_DEFINE)
