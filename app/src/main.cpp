@@ -43,7 +43,6 @@ int main(void)
                 return -EIO;
             }
         }
-        LOG_INF("LED state: %s", led_state ? "ON" : "OFF");
         k_msleep(CONFIG_APP_HEARTBEAT_PERIOD_MS);
     }
     return 0;
