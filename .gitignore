@@ -1,6 +1,15 @@
 # Build
-build
+build*
+
+# VS Code
+.vscode
+
+# Python venv
+.venv
 
 # West files
 .west
 deps
+
+# twister out
+twister-out*
